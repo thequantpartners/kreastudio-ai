@@ -126,7 +126,7 @@ export const PolaroidFlickThrough = React.forwardRef<ImageStackRef>(function Pol
   const positions = React.useMemo(() => {
     const rng = new SeededRandom(seed);
     return cards.map(() => ({
-      x: rng.range(-118, 118),
+      x: rng.range(-76, 76),
       y: rng.range(-18, 26),
       rotation: rng.range(-11, 11),
       scale: rng.range(0.94, 1.04),
