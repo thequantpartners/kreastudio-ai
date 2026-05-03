@@ -61,6 +61,7 @@ function VideoReelsPlayer({ onFinished }: Readonly<{ onFinished: () => void }>) 
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [userStartedPlayback, setUserStartedPlayback] = useState(false);
+  const [immersive, setImmersive] = useState(false);
 
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
@@ -77,18 +78,44 @@ function VideoReelsPlayer({ onFinished }: Readonly<{ onFinished: () => void }>) 
     try {
       await video.play();
       setUserStartedPlayback(true);
+      setImmersive(true);
     } catch {
       video.muted = true;
       setMuted(true);
       setUserStartedPlayback(false);
+      setImmersive(false);
     }
   }
 
   return (
-    <div className="relative mx-auto mt-[clamp(28px,4.5svh,48px)] w-fit">
-      <div className="absolute -inset-5 rounded-[34px] bg-[radial-gradient(circle_at_50%_18%,rgba(255,70,58,.26),transparent_62%)] blur-2xl" />
-      <div className="relative overflow-hidden rounded-[28px] border border-white/14 bg-[#111119] shadow-[0_28px_78px_rgba(0,0,0,.62),0_0_0_1px_rgba(255,255,255,.04)]">
-        <div className="relative aspect-[9/16] h-[min(48svh,520px)] overflow-hidden bg-black">
+    <div
+      className={
+        immersive
+          ? "fixed inset-0 z-50 mx-0 mt-0 h-[100svh] w-screen bg-black md:h-dvh"
+          : "relative mx-auto mt-[clamp(28px,4.5svh,48px)] w-fit"
+      }
+    >
+      <div
+        className={
+          immersive
+            ? "hidden"
+            : "absolute -inset-5 rounded-[34px] bg-[radial-gradient(circle_at_50%_18%,rgba(255,70,58,.26),transparent_62%)] blur-2xl"
+        }
+      />
+      <div
+        className={
+          immersive
+            ? "relative h-full w-full overflow-hidden bg-black"
+            : "relative overflow-hidden rounded-[28px] border border-white/14 bg-[#111119] shadow-[0_28px_78px_rgba(0,0,0,.62),0_0_0_1px_rgba(255,255,255,.04)]"
+        }
+      >
+        <div
+          className={
+            immersive
+              ? "relative h-full w-full overflow-hidden bg-black"
+              : "relative aspect-[9/16] h-[min(48svh,520px)] overflow-hidden bg-black"
+          }
+        >
           <video
             ref={videoRef}
             src={demoVideoUrl}
@@ -100,6 +127,7 @@ function VideoReelsPlayer({ onFinished }: Readonly<{ onFinished: () => void }>) 
             onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
             onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
             onEnded={() => {
+              setImmersive(false);
               if (userStartedPlayback) onFinished();
             }}
           />
