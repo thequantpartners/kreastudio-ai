@@ -85,7 +85,7 @@ function VideoReelsPlayer({ onFinished }: Readonly<{ onFinished: () => void }>) 
   }
 
   return (
-    <div className="relative mx-auto mt-[clamp(12px,2svh,20px)] w-fit">
+    <div className="relative mx-auto mt-[clamp(28px,4.5svh,48px)] w-fit">
       <div className="absolute -inset-5 rounded-[34px] bg-[radial-gradient(circle_at_50%_18%,rgba(255,70,58,.26),transparent_62%)] blur-2xl" />
       <div className="relative overflow-hidden rounded-[28px] border border-white/14 bg-[#111119] shadow-[0_28px_78px_rgba(0,0,0,.62),0_0_0_1px_rgba(255,255,255,.04)]">
         <div className="relative aspect-[9/16] h-[min(48svh,520px)] overflow-hidden bg-black">
@@ -242,7 +242,13 @@ export default function Page() {
             <span className="h-6 w-6" />
           </nav>
 
-          <div className="flex min-h-0 min-w-0 flex-col justify-center overflow-hidden pb-[clamp(10px,1.8svh,18px)] pt-[clamp(12px,2.5svh,24px)] text-center">
+          <div
+            className={`flex min-h-0 min-w-0 flex-col overflow-hidden pb-[clamp(10px,1.8svh,18px)] text-center ${
+              slide.visual === "video"
+                ? "justify-start pt-[clamp(28px,5svh,56px)]"
+                : "justify-center pt-[clamp(12px,2.5svh,24px)]"
+            }`}
+          >
             <p className="mx-auto w-fit border border-[#ff2b2b]/35 bg-[#ff2b2b]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#ff5a4f]">
               {slide.eyebrow}
             </p>
