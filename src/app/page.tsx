@@ -379,12 +379,14 @@ export default function Page() {
                 <span className="size-1 rounded-full bg-[#ff3b2f] shadow-[0_0_14px_rgba(255,59,47,.8)]" />
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-[clamp(17px,4.8vw,22px)] font-black leading-none text-white">30</span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">días</span>
+                  <span className="max-w-[74px] text-left text-[8px] font-semibold uppercase leading-[1.1] tracking-[0.08em] text-white/42">
+                    días de contenido
+                  </span>
                 </div>
                 <span className="size-1 rounded-full bg-[#ff3b2f] shadow-[0_0_14px_rgba(255,59,47,.8)]" />
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-[clamp(17px,4.8vw,22px)] font-black leading-none text-white">1</span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">swipe</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">clic</span>
                 </div>
               </div>
             ) : null}
