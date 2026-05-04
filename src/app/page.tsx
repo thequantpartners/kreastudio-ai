@@ -21,7 +21,7 @@ const slides: Slide[] = [
     copy: "Sube una foto o descripción. Recibe imágenes, copys, ads y posts listos para vender.",
     stat: "30 posts listos",
     visual: "slider",
-    titleClass: "text-[clamp(38px,10.8vw,54px)]",
+    titleClass: "text-[clamp(36px,10vw,50px)]",
   },
   {
     eyebrow: "Resultados",
@@ -291,7 +291,24 @@ export default function Page() {
             {slide.visual === "slider" ? <ImageAutoSlider /> : null}
             {slide.visual === "selector" ? <InteractiveSelector /> : null}
             {slide.visual === "video" ? <VideoReelsPlayer onFinished={() => setCompletedVideoIndex(index)} /> : null}
-            {showMetrics ? (
+            {slide.visual === "slider" ? (
+              <div className="mx-auto mt-[clamp(12px,2svh,18px)] flex w-full max-w-[360px] items-center justify-center gap-[clamp(10px,3.4vw,18px)] text-white/76">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[clamp(17px,4.8vw,22px)] font-black leading-none text-white">10x</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">rápido</span>
+                </div>
+                <span className="size-1 rounded-full bg-[#ff3b2f] shadow-[0_0_14px_rgba(255,59,47,.8)]" />
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[clamp(17px,4.8vw,22px)] font-black leading-none text-white">30</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">días</span>
+                </div>
+                <span className="size-1 rounded-full bg-[#ff3b2f] shadow-[0_0_14px_rgba(255,59,47,.8)]" />
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[clamp(17px,4.8vw,22px)] font-black leading-none text-white">1</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">swipe</span>
+                </div>
+              </div>
+            ) : showMetrics ? (
               <div className="mx-auto mt-[clamp(14px,2.5svh,22px)] grid w-full max-w-full grid-cols-3 gap-2 sm:max-w-[360px]">
               <div className="border border-white/10 bg-[#111119] px-2 py-[clamp(10px,1.8svh,14px)]">
                 <p className="text-[clamp(15px,4.4vw,20px)] font-black">10x</p>
