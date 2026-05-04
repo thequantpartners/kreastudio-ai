@@ -2,15 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Volume2, X } from "lucide-react";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Component as ImageAutoSlider } from "@/components/ui/image-auto-slider";
 import InteractiveSelector from "@/components/ui/interactive-selector";
+import PricingPage from "@/components/ui/pricing-page";
+import { Component as TypewriterTestimonial } from "@/components/ui/typewriter-testimonial";
 
 type Slide = {
   eyebrow: string;
   title: string;
   copy: string;
   stat: string;
-  visual: "slider" | "selector" | "video";
+  visual: "slider" | "selector" | "video" | "pricing";
   titleClass: string;
 };
 
@@ -39,10 +42,55 @@ const slides: Slide[] = [
     visual: "video",
     titleClass: "text-[clamp(30px,8.6vw,42px)]",
   },
+  {
+    eyebrow: "Pagos",
+    title: "Elige el plan y empieza a publicar",
+    copy: "Paga solo por el volumen que necesitas. Cambia de plan cuando tu contenido empiece a escalar.",
+    stat: "3 planes",
+    visual: "pricing",
+    titleClass: "text-[clamp(29px,8.2vw,40px)]",
+  },
+];
+
+const swipeLabels = [
+  "Ver lo que obtendre",
+  "Ver demo",
+  "Crear mi contenido",
 ];
 
 const demoVideoUrl =
   "https://res.cloudinary.com/dvixq2oge/video/upload/v1774233295/WhatsApp_Video_2026-02-08_at_14.08.20_jsdv4g.mp4";
+
+const testimonials = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    text: "Me entrego ideas para todo el mes y pude publicar sin abrir cinco herramientas distintas.",
+    name: "Nicolas",
+    jobtitle: "Real estate",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    text: "Subi una foto del producto y salieron posts, copies y anuncios listos para probar.",
+    name: "Camila",
+    jobtitle: "Ecommerce",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    text: "Lo mejor es que el resultado ya viene con estilo de campana, no como imagen generica.",
+    name: "Alex",
+    jobtitle: "Agencia ads",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    text: "En minutos tenia variaciones para stories, reels y captions. Me ahorro una tarde completa.",
+    name: "Sarah",
+    jobtitle: "Food brand",
+  },
+];
 
 function formatClock(seconds: number) {
   if (!Number.isFinite(seconds) || seconds <= 0) return "00:00";
@@ -245,8 +293,8 @@ export default function Page() {
   const [index, setIndex] = useState(0);
   const [completedVideoIndex, setCompletedVideoIndex] = useState<number | null>(null);
   const slide = slides[index];
-  const showMetrics = slide.visual !== "video";
-  const showSwipeControl = slide.visual !== "video" || completedVideoIndex === index;
+  const showSwipeControl =
+    slide.visual !== "pricing" && (slide.visual !== "video" || completedVideoIndex === index);
 
   useEffect(() => {
     document.documentElement.classList.add("no-scroll-deck");
@@ -267,7 +315,18 @@ export default function Page() {
         <section className="relative grid h-[100svh] min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden px-[clamp(16px,5vw,24px)] pb-[max(14px,env(safe-area-inset-bottom))] pt-[clamp(14px,2.4svh,22px)] md:h-dvh">
           <nav className="flex shrink-0 items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-[0.18em] text-white/72">KreaStudio AI</span>
-            <span className="h-6 w-6" />
+            {index === 0 ? (
+              <HoverBorderGradient
+                type="button"
+                duration={1.15}
+                containerClassName="shrink-0 border-[#3275F8]/80 shadow-[0_0_22px_rgba(50,117,248,.22)]"
+                className="flex h-8 items-center bg-[#07111f] px-4 py-0 text-[12px] font-medium tracking-[0.08em] text-white/86"
+              >
+                <span>Dashboard</span>
+              </HoverBorderGradient>
+            ) : (
+              <span className="h-8 w-[102px] shrink-0" aria-hidden="true" />
+            )}
           </nav>
 
           <div
@@ -291,6 +350,8 @@ export default function Page() {
             {slide.visual === "slider" ? <ImageAutoSlider /> : null}
             {slide.visual === "selector" ? <InteractiveSelector /> : null}
             {slide.visual === "video" ? <VideoReelsPlayer onFinished={() => setCompletedVideoIndex(index)} /> : null}
+            {slide.visual === "pricing" ? <PricingPage /> : null}
+            {slide.visual === "selector" ? <TypewriterTestimonial testimonials={testimonials} /> : null}
             {slide.visual === "slider" ? (
               <div className="mx-auto mt-[clamp(12px,2svh,18px)] flex w-full max-w-[360px] items-center justify-center gap-[clamp(10px,3.4vw,18px)] text-white/76">
                 <div className="flex items-baseline gap-1.5">
@@ -308,28 +369,13 @@ export default function Page() {
                   <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/42">swipe</span>
                 </div>
               </div>
-            ) : showMetrics ? (
-              <div className="mx-auto mt-[clamp(14px,2.5svh,22px)] grid w-full max-w-full grid-cols-3 gap-2 sm:max-w-[360px]">
-              <div className="border border-white/10 bg-[#111119] px-2 py-[clamp(10px,1.8svh,14px)]">
-                <p className="text-[clamp(15px,4.4vw,20px)] font-black">10x</p>
-                <p className="mt-1 text-[9px] uppercase text-white/42">rápido</p>
-              </div>
-              <div className="border border-white/10 bg-[#111119] px-2 py-[clamp(10px,1.8svh,14px)]">
-                <p className="text-[clamp(15px,4.4vw,20px)] font-black">30</p>
-                <p className="mt-1 text-[9px] uppercase text-white/42">días</p>
-              </div>
-              <div className="border border-white/10 bg-[#111119] px-2 py-[clamp(10px,1.8svh,14px)]">
-                <p className="text-[clamp(15px,4.4vw,20px)] font-black">1</p>
-                <p className="mt-1 text-[9px] uppercase text-white/42">swipe</p>
-              </div>
-              </div>
             ) : null}
           </div>
 
           {showSwipeControl ? (
             <div className="shrink-0">
               <SwipeControl
-                label={index === slides.length - 1 ? "Crear mi contenido" : "Desliza para avanzar"}
+                label={swipeLabels[index] ?? "Desliza para avanzar"}
                 onComplete={() => setIndex((current) => Math.min(current + 1, slides.length - 1))}
               />
             </div>
