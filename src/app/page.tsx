@@ -320,9 +320,27 @@ export default function Page() {
                 type="button"
                 duration={1.15}
                 containerClassName="shrink-0 border-[#3275F8]/80 shadow-[0_0_22px_rgba(50,117,248,.22)]"
-                className="flex h-8 items-center bg-[#07111f] px-4 py-0 text-[12px] font-medium tracking-[0.08em] text-white/86"
+                className="flex h-8 items-center gap-2 bg-[#07111f] px-3.5 py-0 text-[12px] font-semibold tracking-[0.08em] text-white/86"
               >
-                <span>Dashboard</span>
+                <span>LOGIN</span>
+                <svg aria-label="Google" viewBox="0 0 24 24" className="size-[15px]" role="img">
+                  <path
+                    fill="#4285F4"
+                    d="M22.6 12.2c0-.8-.1-1.6-.2-2.3H12v4.4h5.9c-.3 1.4-1 2.5-2.1 3.2v2.7h3.4c2-1.8 3.4-4.5 3.4-8z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c3 0 5.5-1 7.3-2.7l-3.4-2.7c-.9.6-2.2 1-3.9 1-3 0-5.6-2-6.5-4.8H2v2.8C3.8 20.4 7.6 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.5 13.8c-.2-.6-.4-1.2-.4-1.8s.1-1.2.4-1.8V7.4H2A10.9 10.9 0 0 0 1 12c0 1.6.4 3.2 1 4.6z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.4c1.6 0 3.1.6 4.3 1.7l3-3A10.2 10.2 0 0 0 12 1C7.6 1 3.8 3.6 2 7.4l3.5 2.8C6.4 7.4 9 5.4 12 5.4z"
+                  />
+                </svg>
               </HoverBorderGradient>
             ) : (
               <span className="h-8 w-[102px] shrink-0" aria-hidden="true" />
