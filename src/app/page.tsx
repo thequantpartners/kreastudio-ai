@@ -5,7 +5,9 @@ import { Volume2, X } from "lucide-react";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Component as ImageAutoSlider } from "@/components/ui/image-auto-slider";
 import InteractiveSelector from "@/components/ui/interactive-selector";
+import { MobileDashboard } from "@/components/ui/mobile-dashboard";
 import PricingPage from "@/components/ui/pricing-page";
+import { Component as SignInCard } from "@/components/ui/sign-in-card-2";
 import { Component as TypewriterTestimonial } from "@/components/ui/typewriter-testimonial";
 
 type Slide = {
@@ -291,6 +293,8 @@ function SwipeControl({
 
 export default function Page() {
   const [index, setIndex] = useState(0);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [completedVideoIndex, setCompletedVideoIndex] = useState<number | null>(null);
   const slide = slides[index];
   const showSwipeControl =
@@ -305,6 +309,37 @@ export default function Page() {
     };
   }, []);
 
+  if (showDashboard) {
+    return (
+      <MobileDashboard
+        onLogout={() => {
+          setIndex(0);
+          setShowSignIn(false);
+          setShowDashboard(false);
+        }}
+      />
+    );
+  }
+
+  if (showSignIn) {
+    return (
+      <main className="h-[100svh] w-full overflow-hidden bg-black text-white md:h-dvh">
+        <div className="relative mx-auto h-[100svh] w-full max-w-full overflow-hidden bg-black md:h-dvh md:max-w-[430px]">
+          <SignInCard
+            onBack={() => {
+              setIndex(0);
+              setShowSignIn(false);
+            }}
+            onContinue={() => {
+              setShowSignIn(false);
+              setShowDashboard(true);
+            }}
+          />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="h-[100svh] w-full overflow-hidden bg-[#050509] text-white md:h-dvh">
       <div className="relative mx-auto h-[100svh] w-full max-w-full overflow-hidden bg-[#050509] md:h-dvh md:max-w-[430px]">
@@ -318,6 +353,10 @@ export default function Page() {
             {index === 0 ? (
               <HoverBorderGradient
                 type="button"
+                onClick={() => {
+                  setIndex(0);
+                  setShowSignIn(true);
+                }}
                 duration={1.15}
                 containerClassName="shrink-0 border-[#3275F8]/80 shadow-[0_0_22px_rgba(50,117,248,.22)]"
                 className="flex h-8 items-center gap-2 bg-[#07111f] px-3.5 py-0 text-[12px] font-semibold tracking-[0.08em] text-white/86"
@@ -368,7 +407,14 @@ export default function Page() {
             {slide.visual === "slider" ? <ImageAutoSlider /> : null}
             {slide.visual === "selector" ? <InteractiveSelector /> : null}
             {slide.visual === "video" ? <VideoReelsPlayer onFinished={() => setCompletedVideoIndex(index)} /> : null}
-            {slide.visual === "pricing" ? <PricingPage /> : null}
+            {slide.visual === "pricing" ? (
+              <PricingPage
+                onStartFree={() => {
+                  setIndex(0);
+                  setShowSignIn(true);
+                }}
+              />
+            ) : null}
             {slide.visual === "selector" ? <TypewriterTestimonial testimonials={testimonials} /> : null}
             {slide.visual === "slider" ? (
               <div className="mx-auto mt-[clamp(12px,2svh,18px)] flex w-full max-w-[360px] items-center justify-center gap-[clamp(10px,3.4vw,18px)] text-white/76">

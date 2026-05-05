@@ -31,7 +31,7 @@ body.no-scroll-deck {
 
 button,
 input {
-  font: inherit;
+  font-family: inherit;
 }
 
 @keyframes gallery-in {

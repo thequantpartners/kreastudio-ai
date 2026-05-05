@@ -38,8 +38,8 @@ const plans: PricingPlan[] = [
   {
     planName: "Agency",
     description: "Para equipos y marcas",
-    price: "Custom",
-    priceDescription: "plan",
+    price: "$50",
+    priceDescription: "USD",
     icon: Building2,
     features: ["Todo en Pro", "Multiples marcas", "Flujos a medida", "Acompanamiento"],
     buttonText: "Hablar con ventas",
@@ -47,7 +47,13 @@ const plans: PricingPlan[] = [
   },
 ];
 
-function PricingCard({ plan }: Readonly<{ plan: PricingPlan }>) {
+function PricingCard({
+  plan,
+  onStartFree,
+}: Readonly<{
+  plan: PricingPlan;
+  onStartFree?: () => void;
+}>) {
   const Icon = plan.icon;
 
   return (
@@ -90,6 +96,7 @@ function PricingCard({ plan }: Readonly<{ plan: PricingPlan }>) {
 
       <button
         type="button"
+        onClick={plan.planName === "Starter" ? onStartFree : undefined}
         className="relative mt-4 h-12 w-full rounded-[14px] bg-white text-[13px] font-black text-[#111119] shadow-[0_18px_36px_rgba(255,255,255,.16)] transition-colors hover:bg-white/88"
       >
         {plan.buttonText}
@@ -98,7 +105,7 @@ function PricingCard({ plan }: Readonly<{ plan: PricingPlan }>) {
   );
 }
 
-export default function PricingPage() {
+export default function PricingPage({ onStartFree }: Readonly<{ onStartFree?: () => void }>) {
   const [activeIndex, setActiveIndex] = useState(1);
   const activePlan = plans[activeIndex];
 
@@ -122,7 +129,7 @@ export default function PricingPage() {
       </div>
 
       <div className="relative min-h-0 flex-1">
-        <PricingCard plan={activePlan} />
+        <PricingCard plan={activePlan} onStartFree={onStartFree} />
       </div>
     </div>
   );
