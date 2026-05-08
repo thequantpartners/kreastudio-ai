@@ -59,10 +59,13 @@ type CampaignPost = {
   cta: string;
   color: string;
   copy: string;
+  imagePrompt?: string;
   status: PostStatus;
   metrics: PostMetrics;
   variants: CopyVariant[];
 };
+
+type GeneratedCampaignPost = Omit<CampaignPost, "status" | "metrics">;
 
 const initialBrief: BrandBrief = {
   brandName: "",
@@ -408,6 +411,8 @@ function CreateView({
   posts,
   marketingScore,
   isGenerating,
+  generationMessage,
+  generationError,
   updateBrief,
   setStep,
   onGenerate,
@@ -417,6 +422,8 @@ function CreateView({
   posts: CampaignPost[];
   marketingScore: number;
   isGenerating: boolean;
+  generationMessage: string;
+  generationError: string;
   updateBrief: (patch: Partial<BrandBrief>) => void;
   setStep: (step: BriefStep) => void;
   onGenerate: () => void;
@@ -545,6 +552,26 @@ function CreateView({
             <p className="mx-auto mt-2 max-w-[260px] text-[12px] leading-5 text-white/58">
               El resultado sera una galeria viva: calendario, estados, metricas manuales y memoria comercial.
             </p>
+            <div className="mx-auto mt-3 grid max-w-[260px] grid-cols-2 gap-2 text-left">
+              <div className="rounded-[8px] bg-black/22 p-2">
+                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-white/42">Saldo requerido</p>
+                <p className="mt-1 text-[12px] font-black text-white">1 credito</p>
+              </div>
+              <div className="rounded-[8px] bg-black/22 p-2">
+                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-white/42">Imagenes</p>
+                <p className="mt-1 text-[12px] font-black text-white">Pendientes</p>
+              </div>
+            </div>
+            {generationMessage ? (
+              <p className="mx-auto mt-3 rounded-[8px] border border-[#68f7a1]/22 bg-[#68f7a1]/10 px-3 py-2 text-[11px] font-bold leading-5 text-[#9dffc3]">
+                {generationMessage}
+              </p>
+            ) : null}
+            {generationError ? (
+              <p className="mx-auto mt-3 rounded-[8px] border border-[#ff5a4f]/24 bg-[#ff5a4f]/10 px-3 py-2 text-[11px] font-bold leading-5 text-[#ffb5af]">
+                {generationError}
+              </p>
+            ) : null}
           </div>
         ) : null}
       </section>
@@ -563,9 +590,10 @@ function CreateView({
           <button
             type="button"
             onClick={onGenerate}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#f8582f,#ffd166)] px-5 text-[12px] font-black text-[#181018] shadow-[0_14px_32px_rgba(248,88,47,.28)]"
+            disabled={isGenerating}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#f8582f,#ffd166)] px-5 text-[12px] font-black text-[#181018] shadow-[0_14px_32px_rgba(248,88,47,.28)] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Generar galeria
+            {isGenerating ? "Validando conexion" : "Generar galeria"}
             <Sparkles className="size-4" />
           </button>
         ) : (
@@ -681,12 +709,14 @@ function PostCard({
 function GalleryView({
   posts,
   marketingScore,
+  generationMessage,
   selectedTones,
   setSelectedTones,
   updatePost,
 }: Readonly<{
   posts: CampaignPost[];
   marketingScore: number;
+  generationMessage: string;
   selectedTones: Record<number, string>;
   setSelectedTones: (value: Record<number, string>) => void;
   updatePost: (day: number, patch: Partial<CampaignPost>) => void;
@@ -698,6 +728,11 @@ function GalleryView({
         <h1 className="mt-1 text-[24px] font-semibold leading-[1.05] text-white">Calendario vivo de contenido</h1>
         <p className="mt-2 text-[12px] leading-5 text-white/58">Marca estados, registra metricas y convierte resultados en memoria comercial.</p>
       </header>
+      {generationMessage ? (
+        <div className="mt-4 rounded-[8px] border border-[#68f7a1]/22 bg-[#68f7a1]/10 p-3 text-[11px] font-bold leading-5 text-[#9dffc3]">
+          {generationMessage}
+        </div>
+      ) : null}
       <MarketingScoreCard score={marketingScore} posts={posts} />
       <WeeklyReview posts={posts} />
       <div className="mt-4 space-y-3">
@@ -883,20 +918,55 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
   const [posts, setPosts] = useState<CampaignPost[]>(() => buildCampaignPosts(initialBrief));
   const [selectedTones, setSelectedTones] = useState<Record<number, string>>({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationMessage, setGenerationMessage] = useState("");
+  const [generationError, setGenerationError] = useState("");
   const marketingScore = getMarketingScore(posts, brief);
 
   function updateBrief(patch: Partial<BrandBrief>) {
     setBrief((current) => ({ ...current, ...patch }));
   }
 
-  function generateCampaign() {
+  async function generateCampaign() {
     setIsGenerating(true);
-    window.setTimeout(() => {
-      setPosts(buildCampaignPosts(brief));
+    setGenerationMessage("");
+    setGenerationError("");
+
+    try {
+      const requiredFields = [brief.brandName, brief.description, brief.offer, brief.audience];
+
+      if (requiredFields.some((field) => !field.trim())) {
+        throw new Error("Completa marca, descripcion, oferta y audiencia antes de generar.");
+      }
+
+      const response = await fetch("/api/content/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ brief }),
+      });
+      const data = (await response.json()) as { message?: string; posts?: GeneratedCampaignPost[] };
+
+      if (!response.ok) {
+        throw new Error(data.message ?? "No se pudo generar el contenido de 30 dias.");
+      }
+
+      const generatedPosts =
+        data.posts?.map((post) => ({
+          ...post,
+          status: "Pendiente" as PostStatus,
+          metrics: { ...emptyMetrics },
+        })) ?? buildCampaignPosts(brief);
+
+      setGenerationMessage(data.message ?? "Contenido de 30 dias generado correctamente.");
+      setPosts(generatedPosts);
       setSelectedTones({});
-      setIsGenerating(false);
       setActiveTab("gallery");
-    }, 720);
+    } catch (error) {
+      setGenerationError(error instanceof Error ? error.message : "No se pudo generar el contenido de 30 dias.");
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   function updatePost(day: number, patch: Partial<CampaignPost>) {
@@ -919,6 +989,8 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
               posts={posts}
               marketingScore={marketingScore}
               isGenerating={isGenerating}
+              generationMessage={generationMessage}
+              generationError={generationError}
               updateBrief={updateBrief}
               setStep={setBriefStep}
               onGenerate={generateCampaign}
@@ -928,6 +1000,7 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
             <GalleryView
               posts={posts}
               marketingScore={marketingScore}
+              generationMessage={generationMessage}
               selectedTones={selectedTones}
               setSelectedTones={setSelectedTones}
               updatePost={updatePost}

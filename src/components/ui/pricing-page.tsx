@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { BriefcaseBusiness, Building2, Check, Sparkles } from "lucide-react";
 
 type PricingPlan = {
+  id: "starter" | "pro" | "agency";
   planName: string;
   description: string;
   price: string;
@@ -16,6 +17,7 @@ type PricingPlan = {
 
 const plans: PricingPlan[] = [
   {
+    id: "starter",
     planName: "Starter",
     description: "Para probar el flujo",
     price: "$0",
@@ -26,6 +28,7 @@ const plans: PricingPlan[] = [
     isPopular: false,
   },
   {
+    id: "pro",
     planName: "Pro",
     description: "Para publicar cada semana",
     price: "$29",
@@ -36,6 +39,7 @@ const plans: PricingPlan[] = [
     isPopular: true,
   },
   {
+    id: "agency",
     planName: "Agency",
     description: "Para equipos y marcas",
     price: "$50",
@@ -50,9 +54,15 @@ const plans: PricingPlan[] = [
 function PricingCard({
   plan,
   onStartFree,
+  onCheckout,
+  checkoutError,
+  isCheckingOut,
 }: Readonly<{
   plan: PricingPlan;
   onStartFree?: () => void;
+  onCheckout: (packId: PricingPlan["id"]) => void;
+  checkoutError: string;
+  isCheckingOut: boolean;
 }>) {
   const Icon = plan.icon;
 
@@ -96,18 +106,46 @@ function PricingCard({
 
       <button
         type="button"
-        onClick={plan.planName === "Starter" ? onStartFree : undefined}
-        className="relative mt-4 h-12 w-full rounded-[14px] bg-white text-[13px] font-black text-[#111119] shadow-[0_18px_36px_rgba(255,255,255,.16)] transition-colors hover:bg-white/88"
+        onClick={plan.planName === "Starter" ? onStartFree : () => onCheckout(plan.id)}
+        disabled={isCheckingOut}
+        className="relative mt-4 h-12 w-full rounded-[14px] bg-white text-[13px] font-black text-[#111119] shadow-[0_18px_36px_rgba(255,255,255,.16)] transition-colors hover:bg-white/88 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {plan.buttonText}
+        {isCheckingOut && plan.planName !== "Starter" ? "Abriendo pago..." : plan.buttonText}
       </button>
+      {checkoutError ? <p className="relative mt-3 text-center text-[11px] font-semibold leading-4 text-[#ffb5af]">{checkoutError}</p> : null}
     </div>
   );
 }
 
 export default function PricingPage({ onStartFree }: Readonly<{ onStartFree?: () => void }>) {
   const [activeIndex, setActiveIndex] = useState(1);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const activePlan = plans[activeIndex];
+
+  async function startCheckout(packId: PricingPlan["id"]) {
+    setCheckoutError("");
+    setIsCheckingOut(true);
+
+    try {
+      const response = await fetch("/api/payments/mercado-pago/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packId }),
+      });
+      const data = (await response.json()) as { checkout?: { checkoutUrl?: string }; message?: string };
+
+      if (!response.ok || !data.checkout?.checkoutUrl) {
+        throw new Error(data.message ?? "No se pudo abrir Mercado Pago.");
+      }
+
+      window.location.href = data.checkout.checkoutUrl;
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "No se pudo abrir Mercado Pago.");
+    } finally {
+      setIsCheckingOut(false);
+    }
+  }
 
   return (
     <div className="relative mx-auto mt-[clamp(14px,2.2svh,22px)] flex h-[min(43svh,392px)] min-h-[318px] w-full max-w-full flex-col overflow-hidden">
@@ -129,7 +167,13 @@ export default function PricingPage({ onStartFree }: Readonly<{ onStartFree?: ()
       </div>
 
       <div className="relative min-h-0 flex-1">
-        <PricingCard plan={activePlan} onStartFree={onStartFree} />
+        <PricingCard
+          plan={activePlan}
+          onStartFree={onStartFree}
+          onCheckout={startCheckout}
+          checkoutError={checkoutError}
+          isCheckingOut={isCheckingOut}
+        />
       </div>
     </div>
   );
