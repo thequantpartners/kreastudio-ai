@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { BriefcaseBusiness, Building2, Check, Sparkles } from "lucide-react";
 
 type PricingPlan = {
@@ -118,6 +119,7 @@ function PricingCard({
 }
 
 export default function PricingPage({ onStartFree }: Readonly<{ onStartFree?: () => void }>) {
+  const { isLoaded, isSignedIn } = useUser();
   const [activeIndex, setActiveIndex] = useState(1);
   const [checkoutError, setCheckoutError] = useState("");
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -125,6 +127,12 @@ export default function PricingPage({ onStartFree }: Readonly<{ onStartFree?: ()
 
   async function startCheckout(packId: PricingPlan["id"]) {
     setCheckoutError("");
+
+    if (isLoaded && !isSignedIn) {
+      onStartFree?.();
+      return;
+    }
+
     setIsCheckingOut(true);
 
     try {

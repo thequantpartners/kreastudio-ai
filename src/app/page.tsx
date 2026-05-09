@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Volume2, X } from "lucide-react";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Component as ImageAutoSlider } from "@/components/ui/image-auto-slider";
 import InteractiveSelector from "@/components/ui/interactive-selector";
-import { MobileDashboard } from "@/components/ui/mobile-dashboard";
 import PricingPage from "@/components/ui/pricing-page";
-import { Component as SignInCard } from "@/components/ui/sign-in-card-2";
 import { Component as TypewriterTestimonial } from "@/components/ui/typewriter-testimonial";
 
 type Slide = {
@@ -292,13 +291,16 @@ function SwipeControl({
 }
 
 export default function Page() {
+  const router = useRouter();
   const [index, setIndex] = useState(0);
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
   const [completedVideoIndex, setCompletedVideoIndex] = useState<number | null>(null);
   const slide = slides[index];
   const showSwipeControl =
     slide.visual !== "pricing" && (slide.visual !== "video" || completedVideoIndex === index);
+
+  function openSignIn() {
+    router.push("/sign-in");
+  }
 
   useEffect(() => {
     document.documentElement.classList.add("no-scroll-deck");
@@ -308,37 +310,6 @@ export default function Page() {
       document.body.classList.remove("no-scroll-deck");
     };
   }, []);
-
-  if (showDashboard) {
-    return (
-      <MobileDashboard
-        onLogout={() => {
-          setIndex(0);
-          setShowSignIn(false);
-          setShowDashboard(false);
-        }}
-      />
-    );
-  }
-
-  if (showSignIn) {
-    return (
-      <main className="h-[100svh] w-full overflow-hidden bg-black text-white md:h-dvh">
-        <div className="relative mx-auto h-[100svh] w-full max-w-full overflow-hidden bg-black md:h-dvh md:max-w-[430px]">
-          <SignInCard
-            onBack={() => {
-              setIndex(0);
-              setShowSignIn(false);
-            }}
-            onContinue={() => {
-              setShowSignIn(false);
-              setShowDashboard(true);
-            }}
-          />
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="h-[100svh] w-full overflow-hidden bg-[#050509] text-white md:h-dvh">
@@ -355,7 +326,7 @@ export default function Page() {
                 type="button"
                 onClick={() => {
                   setIndex(0);
-                  setShowSignIn(true);
+                  openSignIn();
                 }}
                 duration={1.15}
                 containerClassName="shrink-0 border-[#3275F8]/80 shadow-[0_0_22px_rgba(50,117,248,.22)]"
@@ -411,7 +382,7 @@ export default function Page() {
               <PricingPage
                 onStartFree={() => {
                   setIndex(0);
-                  setShowSignIn(true);
+                  openSignIn();
                 }}
               />
             ) : null}

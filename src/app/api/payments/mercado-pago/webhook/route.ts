@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCreditPack, getMercadoPagoPayment } from "@/server/payments/mercado-pago";
+import { getMercadoPagoPayment, persistMercadoPagoPaymentResult } from "@/server/payments/mercado-pago";
 
 export const runtime = "nodejs";
 
@@ -12,22 +12,37 @@ export async function POST(request: Request) {
   }
 
   const payment = await getMercadoPagoPayment(String(paymentId));
-  const packId = String(payment.metadata?.pack_id ?? "");
-  const pack = getCreditPack(packId);
+  const externalReference = String(payment.external_reference ?? "");
+  const raw = JSON.parse(JSON.stringify(payment)) as Record<string, unknown>;
 
-  if (payment.status !== "approved" || !pack) {
+  if (!externalReference) {
+    return NextResponse.json({
+      ok: true,
+      paymentStatus: payment.status,
+      ignored: true,
+      reason: "missing_external_reference",
+    });
+  }
+
+  const result = await persistMercadoPagoPaymentResult(
+    externalReference,
+    String(payment.id ?? paymentId),
+    String(payment.status ?? "unknown"),
+    raw
+  );
+
+  if (payment.status !== "approved") {
     return NextResponse.json({
       ok: true,
       paymentStatus: payment.status,
       credited: false,
+      result,
     });
   }
 
-  // TODO: Persist this in a database ledger before enabling real user balances.
   return NextResponse.json({
     ok: true,
-    credited: true,
-    credits: pack.credits,
-    externalReference: payment.external_reference,
+    paymentStatus: payment.status,
+    result,
   });
 }

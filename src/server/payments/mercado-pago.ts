@@ -1,5 +1,8 @@
+import { randomUUID } from "crypto";
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
 import { creditPacks } from "@/server/billing/policy";
+import type { AppUserSession } from "@/server/auth/app-user";
+import { createSupabaseServiceClient } from "@/server/db/supabase";
 
 export type CreditPackId = (typeof creditPacks)[number]["id"];
 
@@ -28,7 +31,7 @@ export function createMercadoPagoClient() {
   });
 }
 
-export async function createCreditCheckout(packId: string, customerEmail?: string) {
+export async function createCreditCheckout(packId: string, appUser: AppUserSession) {
   const pack = getCreditPack(packId);
 
   if (!pack) {
@@ -38,7 +41,23 @@ export async function createCreditCheckout(packId: string, customerEmail?: strin
   const appUrl = getAppUrl();
   const client = createMercadoPagoClient();
   const preference = new Preference(client);
-  const externalReference = `credits:${pack.id}:${Date.now()}`;
+  const externalReference = `credits:${appUser.id}:${pack.id}:${randomUUID()}`;
+  const supabase = createSupabaseServiceClient();
+
+  const { error: transactionError } = await supabase.from("payment_transactions").insert({
+    user_id: appUser.id,
+    external_reference: externalReference,
+    pack_id: pack.id,
+    amount_cents: pack.priceCents,
+    currency: pack.currency,
+    status: "created",
+    credits: pack.credits,
+    raw: {},
+  });
+
+  if (transactionError) {
+    throw new Error(transactionError.message);
+  }
 
   const result = await preference.create({
     body: {
@@ -50,8 +69,9 @@ export async function createCreditCheckout(packId: string, customerEmail?: strin
         failure: `${appUrl}/?payment=failure`,
       },
       auto_return: "approved",
-      payer: customerEmail ? { email: customerEmail } : undefined,
+      payer: appUser.email ? { email: appUser.email } : undefined,
       metadata: {
+        app_user_id: appUser.id,
         pack_id: pack.id,
         credits: pack.credits,
       },
@@ -81,4 +101,25 @@ export async function getMercadoPagoPayment(paymentId: string) {
   const payment = new Payment(client);
 
   return payment.get({ id: paymentId });
+}
+
+export async function persistMercadoPagoPaymentResult(
+  externalReference: string,
+  providerPaymentId: string,
+  status: string,
+  raw: Record<string, unknown>
+) {
+  const supabase = createSupabaseServiceClient();
+  const { data, error } = await supabase.rpc("credit_mercado_pago_payment", {
+    p_external_reference: externalReference,
+    p_provider_payment_id: providerPaymentId,
+    p_status: status,
+    p_raw: raw,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 }

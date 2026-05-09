@@ -213,6 +213,8 @@ export function Component({ onBack, onContinue }: Readonly<SignInCardProps>) {
               </div>
 
               <div className="space-y-4">
+                <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" data-cl-language="es-es" />
+
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
