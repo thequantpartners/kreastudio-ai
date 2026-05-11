@@ -15,6 +15,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="es" data-scroll-behavior="smooth">
+        <head>
+          <link rel="preconnect" href="https://accounts.google.com" />
+          <link rel="preconnect" href="https://www.gstatic.com" />
+        </head>
         <body>{children}</body>
       </html>
     </ClerkProvider>

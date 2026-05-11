@@ -187,6 +187,8 @@ function getCommercialMemory(posts: CampaignPost[]) {
   };
 }
 
+type CommercialMemory = ReturnType<typeof getCommercialMemory>;
+
 function SectionTitle({
   title,
   action,
@@ -295,16 +297,18 @@ function ProgressRail({ step }: Readonly<{ step: BriefStep }>) {
 function CampaignHero({
   brief,
   postCount,
+  userName,
 }: Readonly<{
   brief: BrandBrief;
   postCount: number;
+  userName: string;
 }>) {
   return (
-    <article className="relative overflow-hidden rounded-[8px] border border-white/10 bg-[linear-gradient(145deg,rgba(83,84,109,.7),rgba(37,38,51,.86)_62%,rgba(24,24,32,.92))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.1),0_18px_36px_rgba(0,0,0,.26)]">
-      <div className="absolute -right-10 -top-10 size-28 rounded-full bg-[#f8582f]/24 blur-2xl" />
+    <article className="relative overflow-hidden rounded-[8px] border border-white/10 bg-[linear-gradient(145deg,rgba(74,75,96,.82),rgba(35,36,49,.92)_62%,rgba(22,22,30,.96))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.1),0_12px_24px_rgba(0,0,0,.22)]">
+      <div className="pointer-events-none absolute -right-10 -top-10 size-28 rounded-full bg-[#f8582f]/16" />
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffd166]">Campana 30 dias</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffd166]">Hola, {userName}</p>
           <h1 className="mt-2 text-[24px] font-semibold leading-[1.05] text-white">Que contenido crearemos hoy?</h1>
         </div>
         <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f8582f]/22 text-[#ffd166]">
@@ -332,18 +336,17 @@ function CampaignHero({
 
 function MarketingScoreCard({
   score,
-  posts,
+  memory,
 }: Readonly<{
   score: number;
-  posts: CampaignPost[];
+  memory: CommercialMemory;
 }>) {
-  const memory = getCommercialMemory(posts);
   const publishedCount = memory.published.length;
   const pendingCount = memory.pending.length;
 
   return (
-    <article className="relative mt-4 overflow-hidden rounded-[8px] border border-[#ffd166]/18 bg-[linear-gradient(145deg,rgba(248,88,47,.22),rgba(36,37,50,.94)_58%,rgba(20,20,29,.98))] p-4">
-      <div className="absolute right-[-28px] top-[-28px] size-24 rounded-full bg-[#ffd166]/18 blur-2xl" />
+    <article className="relative mt-4 overflow-hidden rounded-[8px] border border-[#ffd166]/18 bg-[linear-gradient(145deg,rgba(248,88,47,.18),rgba(36,37,50,.94)_58%,rgba(20,20,29,.98))] p-4 shadow-[0_10px_22px_rgba(0,0,0,.18)]">
+      <div className="pointer-events-none absolute right-[-28px] top-[-28px] size-24 rounded-full bg-[#ffd166]/12" />
       <div className="relative flex items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffd166]">Marketing Score</p>
@@ -408,8 +411,10 @@ function WeeklyReview({ posts }: Readonly<{ posts: CampaignPost[] }>) {
 function CreateView({
   brief,
   step,
-  posts,
   marketingScore,
+  commercialMemory,
+  publishedCount,
+  userName,
   isGenerating,
   generationMessage,
   generationError,
@@ -419,8 +424,10 @@ function CreateView({
 }: Readonly<{
   brief: BrandBrief;
   step: BriefStep;
-  posts: CampaignPost[];
   marketingScore: number;
+  commercialMemory: CommercialMemory;
+  publishedCount: number;
+  userName: string;
   isGenerating: boolean;
   generationMessage: string;
   generationError: string;
@@ -433,8 +440,8 @@ function CreateView({
 
   return (
     <>
-      <CampaignHero brief={brief} postCount={posts.filter((post) => post.status !== "Pendiente").length} />
-      <MarketingScoreCard score={marketingScore} posts={posts} />
+      <CampaignHero brief={brief} postCount={publishedCount} userName={userName} />
+      <MarketingScoreCard score={marketingScore} memory={commercialMemory} />
       <ProgressRail step={step} />
 
       <section className="mt-4 space-y-3">
@@ -709,6 +716,7 @@ function PostCard({
 function GalleryView({
   posts,
   marketingScore,
+  commercialMemory,
   generationMessage,
   selectedTones,
   setSelectedTones,
@@ -716,6 +724,7 @@ function GalleryView({
 }: Readonly<{
   posts: CampaignPost[];
   marketingScore: number;
+  commercialMemory: CommercialMemory;
   generationMessage: string;
   selectedTones: Record<number, string>;
   setSelectedTones: (value: Record<number, string>) => void;
@@ -733,7 +742,7 @@ function GalleryView({
           {generationMessage}
         </div>
       ) : null}
-      <MarketingScoreCard score={marketingScore} posts={posts} />
+      <MarketingScoreCard score={marketingScore} memory={commercialMemory} />
       <WeeklyReview posts={posts} />
       <div className="mt-4 space-y-3">
         {posts.map((post) => (
@@ -805,14 +814,14 @@ function CalendarView({ posts }: Readonly<{ posts: CampaignPost[] }>) {
 
 function BrandView({
   brief,
-  posts,
   marketingScore,
+  commercialMemory,
 }: Readonly<{
   brief: BrandBrief;
-  posts: CampaignPost[];
   marketingScore: number;
+  commercialMemory: CommercialMemory;
 }>) {
-  const memory = getCommercialMemory(posts);
+  const memory = commercialMemory;
   const details = [
     ["Marca", brief.brandName || "Pendiente"],
     ["Descripcion", brief.description || "Pendiente"],
@@ -827,7 +836,7 @@ function BrandView({
         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffd166]">Memoria comercial</p>
         <h1 className="mt-1 text-[24px] font-semibold leading-[1.05] text-white">Lo que tu marca aprende</h1>
       </header>
-      <MarketingScoreCard score={marketingScore} posts={posts} />
+      <MarketingScoreCard score={marketingScore} memory={commercialMemory} />
       <section className="mt-4 rounded-[8px] border border-[#ffd166]/18 bg-[#ffd166]/8 p-3">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-black/24 text-[#ffd166]">
@@ -911,7 +920,13 @@ function SettingsView({ onLogout }: Readonly<{ onLogout?: () => void }>) {
   );
 }
 
-export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }>) {
+export function MobileDashboard({
+  userName,
+  onLogout,
+}: Readonly<{
+  userName?: string;
+  onLogout?: () => void;
+}>) {
   const [activeTab, setActiveTab] = useState<Tab>("create");
   const [briefStep, setBriefStep] = useState<BriefStep>("assets");
   const [brief, setBrief] = useState<BrandBrief>(initialBrief);
@@ -920,7 +935,9 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationMessage, setGenerationMessage] = useState("");
   const [generationError, setGenerationError] = useState("");
-  const marketingScore = getMarketingScore(posts, brief);
+  const marketingScore = useMemo(() => getMarketingScore(posts, brief), [posts, brief]);
+  const commercialMemory = useMemo(() => getCommercialMemory(posts), [posts]);
+  const publishedCount = commercialMemory.published.length;
 
   function updateBrief(patch: Partial<BrandBrief>) {
     setBrief((current) => ({ ...current, ...patch }));
@@ -975,19 +992,20 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
 
   return (
     <main className="h-[100svh] w-full overflow-hidden bg-[#10071d] text-white md:h-dvh">
-      <div className="relative mx-auto grid h-[100svh] w-full max-w-full grid-rows-[minmax(0,1fr)_auto] overflow-hidden bg-[linear-gradient(180deg,#1b1230_0%,#151522_42%,#0c0d13_100%)] px-[clamp(16px,5vw,22px)] pb-[max(14px,env(safe-area-inset-bottom))] pt-3 md:h-dvh md:max-w-[430px]">
-        <div className="absolute left-[-130px] top-[-90px] size-72 rounded-full bg-[#7b4dff]/32 blur-3xl" />
-        <div className="absolute right-[-110px] top-28 size-64 rounded-full bg-[#f8582f]/18 blur-3xl" />
-        <div className="absolute bottom-[-140px] left-12 size-72 rounded-full bg-[#ffd166]/12 blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,.08),transparent_34%),linear-gradient(180deg,transparent_0%,rgba(0,0,0,.28)_100%)]" />
+      <div className="relative mx-auto grid h-[100svh] w-full max-w-full grid-rows-[minmax(0,1fr)_auto] overflow-hidden bg-[linear-gradient(180deg,#1a1328_0%,#141520_45%,#0c0d13_100%)] px-[clamp(16px,5vw,22px)] pb-[max(14px,env(safe-area-inset-bottom))] pt-3 md:h-dvh md:max-w-[430px]">
+        <div className="pointer-events-none absolute left-[-110px] top-[-80px] size-60 rounded-full bg-[#7b4dff]/20" />
+        <div className="pointer-events-none absolute right-[-96px] top-24 size-52 rounded-full bg-[#f8582f]/12" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(0,0,0,.22)_100%)]" />
 
         <div className="relative z-10 min-h-0 overflow-y-auto overflow-x-hidden pb-4 pt-2 [scrollbar-width:none]">
           {activeTab === "create" ? (
             <CreateView
               brief={brief}
               step={briefStep}
-              posts={posts}
               marketingScore={marketingScore}
+              commercialMemory={commercialMemory}
+              publishedCount={publishedCount}
+              userName={userName ?? "socio"}
               isGenerating={isGenerating}
               generationMessage={generationMessage}
               generationError={generationError}
@@ -1000,6 +1018,7 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
             <GalleryView
               posts={posts}
               marketingScore={marketingScore}
+              commercialMemory={commercialMemory}
               generationMessage={generationMessage}
               selectedTones={selectedTones}
               setSelectedTones={setSelectedTones}
@@ -1007,7 +1026,9 @@ export function MobileDashboard({ onLogout }: Readonly<{ onLogout?: () => void }
             />
           ) : null}
           {activeTab === "calendar" ? <CalendarView posts={posts} /> : null}
-          {activeTab === "brand" ? <BrandView brief={brief} posts={posts} marketingScore={marketingScore} /> : null}
+          {activeTab === "brand" ? (
+            <BrandView brief={brief} marketingScore={marketingScore} commercialMemory={commercialMemory} />
+          ) : null}
           {activeTab === "settings" ? <SettingsView onLogout={onLogout} /> : null}
         </div>
 

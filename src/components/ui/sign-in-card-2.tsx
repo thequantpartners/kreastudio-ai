@@ -1,31 +1,16 @@
 "use client";
 
 import React from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
 type SignInCardProps = {
+  isLoading?: boolean;
   onBack?: () => void;
   onContinue?: () => void;
 };
 
-export function Component({ onBack, onContinue }: Readonly<SignInCardProps>) {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useTransform(mouseY, [-300, 300], [10, -10]);
-  const rotateY = useTransform(mouseX, [-300, 300], [-10, 10]);
-
-  const handleMouseMove = (event: React.MouseEvent) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    mouseX.set(event.clientX - rect.left - rect.width / 2);
-    mouseY.set(event.clientY - rect.top - rect.height / 2);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
+export function Component({ isLoading = false, onBack, onContinue }: Readonly<SignInCardProps>) {
   return (
     <div className="relative flex h-[100svh] w-full items-center justify-center overflow-hidden bg-[#050509] px-5 py-6 text-white md:h-dvh">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,transparent,#050509_72%)]" />
@@ -38,34 +23,8 @@ export function Component({ onBack, onContinue }: Readonly<SignInCardProps>) {
       />
       <div className="absolute left-[-120px] top-[-90px] size-72 rounded-full bg-[#ff2b2b]/26 blur-3xl" />
       <div className="absolute right-[-130px] top-36 size-80 rounded-full bg-orange-600/18 blur-3xl" />
-      <div className="absolute left-1/2 top-0 h-[60vh] w-[120vh] -translate-x-1/2 rounded-b-[50%] bg-[#3275F8]/14 blur-[80px]" />
-      <motion.div
-        className="absolute left-1/2 top-0 h-[60vh] w-[100vh] -translate-x-1/2 rounded-b-full bg-[#ff2b2b]/16 blur-[60px]"
-        animate={{
-          opacity: [0.15, 0.3, 0.15],
-          scale: [0.98, 1.02, 0.98],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          repeatType: "mirror",
-        }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-1/2 h-[90vh] w-[90vh] -translate-x-1/2 rounded-t-full bg-orange-600/14 blur-[60px]"
-        animate={{
-          opacity: [0.3, 0.5, 0.3],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 6,
-          repeat: Infinity,
-          repeatType: "mirror",
-          delay: 1,
-        }}
-      />
-      <div className="absolute left-1/4 top-1/4 h-96 w-96 animate-pulse rounded-full bg-[#3275F8]/10 opacity-40 blur-[100px]" />
-      <div className="absolute bottom-1/4 right-1/4 h-96 w-96 animate-pulse rounded-full bg-[#ff2b2b]/10 opacity-40 blur-[100px] delay-1000" />
+      <div className="absolute left-1/2 top-0 h-[45vh] w-[85vh] -translate-x-1/2 rounded-b-[50%] bg-[#3275F8]/10 blur-3xl" />
+      <div className="absolute bottom-0 left-1/2 h-[52vh] w-[72vh] -translate-x-1/2 rounded-t-full bg-orange-600/10 blur-3xl" />
 
       <button
         type="button"
@@ -85,94 +44,32 @@ export function Component({ onBack, onContinue }: Readonly<SignInCardProps>) {
       >
         <motion.div
           className="relative"
-          style={{ rotateX, rotateY }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          whileHover={{ z: 10 }}
         >
           <div className="group relative">
             <motion.div
-              className="absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-700 group-hover:opacity-70"
-              animate={{
-                boxShadow: [
-                  "0 0 10px 2px rgba(255,255,255,0.03)",
-                  "0 0 15px 5px rgba(255,255,255,0.05)",
-                  "0 0 10px 2px rgba(255,255,255,0.03)",
-                ],
-                opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatType: "mirror",
-              }}
+              className="pointer-events-none absolute -inset-px rounded-2xl opacity-30 transition-opacity duration-700 group-hover:opacity-60"
             />
 
-            <div className="absolute -inset-px overflow-hidden rounded-2xl">
-              <motion.div
+            <div className="pointer-events-none absolute -inset-px overflow-hidden rounded-2xl">
+              <div
                 className="absolute left-0 top-0 h-[3px] w-1/2 bg-gradient-to-r from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  left: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  left: { duration: 2.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1 },
-                  opacity: { duration: 1.2, repeat: Infinity, repeatType: "mirror" },
-                  filter: { duration: 1.5, repeat: Infinity, repeatType: "mirror" },
-                }}
               />
-              <motion.div
+              <div
                 className="absolute right-0 top-0 h-1/2 w-[3px] bg-gradient-to-b from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  top: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  top: { duration: 2.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1, delay: 0.6 },
-                  opacity: { duration: 1.2, repeat: Infinity, repeatType: "mirror", delay: 0.6 },
-                  filter: { duration: 1.5, repeat: Infinity, repeatType: "mirror", delay: 0.6 },
-                }}
               />
-              <motion.div
+              <div
                 className="absolute bottom-0 right-0 h-[3px] w-1/2 bg-gradient-to-r from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  right: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  right: { duration: 2.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1, delay: 1.2 },
-                  opacity: { duration: 1.2, repeat: Infinity, repeatType: "mirror", delay: 1.2 },
-                  filter: { duration: 1.5, repeat: Infinity, repeatType: "mirror", delay: 1.2 },
-                }}
               />
-              <motion.div
+              <div
                 className="absolute bottom-0 left-0 h-1/2 w-[3px] bg-gradient-to-b from-transparent via-white to-transparent opacity-70"
-                initial={{ filter: "blur(2px)" }}
-                animate={{
-                  bottom: ["-50%", "100%"],
-                  opacity: [0.3, 0.7, 0.3],
-                  filter: ["blur(1px)", "blur(2.5px)", "blur(1px)"],
-                }}
-                transition={{
-                  bottom: { duration: 2.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 1, delay: 1.8 },
-                  opacity: { duration: 1.2, repeat: Infinity, repeatType: "mirror", delay: 1.8 },
-                  filter: { duration: 1.5, repeat: Infinity, repeatType: "mirror", delay: 1.8 },
-                }}
               />
             </div>
 
-            <div className="absolute -inset-[0.5px] rounded-2xl bg-gradient-to-r from-white/[0.03] via-white/[0.07] to-white/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
+            <div className="pointer-events-none absolute -inset-[0.5px] rounded-2xl bg-gradient-to-r from-white/[0.03] via-white/[0.07] to-white/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
 
             <div className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-black/40 p-6 shadow-2xl backdrop-blur-xl">
               <div
-                className="absolute inset-0 opacity-[0.03]"
+                className="pointer-events-none absolute inset-0 opacity-[0.03]"
                 style={{
                   backgroundImage:
                     "linear-gradient(135deg, white 0.5px, transparent 0.5px), linear-gradient(45deg, white 0.5px, transparent 0.5px)",
@@ -212,23 +109,35 @@ export function Component({ onBack, onContinue }: Readonly<SignInCardProps>) {
                 </motion.p>
               </div>
 
-              <div className="space-y-4">
-                <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" data-cl-language="es-es" />
+              <div className="relative z-10 space-y-4">
+                <div
+                  id="clerk-captcha"
+                  className="relative z-20 pointer-events-auto"
+                  data-cl-theme="dark"
+                  data-cl-size="flexible"
+                  data-cl-language="es-es"
+                />
 
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={isLoading ? undefined : { scale: 1.02 }}
+                  whileTap={isLoading ? undefined : { scale: 0.98 }}
                   type="button"
                   onClick={onContinue}
-                  className="group/google relative w-full"
+                  disabled={isLoading}
+                  aria-busy={isLoading}
+                  className="group/google relative w-full disabled:cursor-wait"
                 >
                   <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 blur-xl transition-opacity duration-300 group-hover/google:opacity-80" />
-                  <div className="relative flex h-12 items-center justify-center gap-3 overflow-hidden rounded-xl border border-white/15 bg-white text-sm font-semibold text-black shadow-[0_18px_44px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.8)] transition-all duration-300 hover:border-white/40">
+                  <div className="relative flex h-12 items-center justify-center gap-3 overflow-hidden rounded-xl border border-white/15 bg-white text-sm font-semibold text-black shadow-[0_18px_44px_rgba(0,0,0,.24),inset_0_1px_0_rgba(255,255,255,.8)] transition-all duration-300 hover:border-white/40 group-disabled/google:opacity-90">
                     <div className="flex size-5 items-center justify-center rounded-full bg-black text-xs font-black text-white transition-transform duration-300 group-hover/google:scale-110">
-                      G
+                      {isLoading ? (
+                        <span className="size-3 rounded-full border-2 border-white/35 border-t-white animate-spin" />
+                      ) : (
+                        "G"
+                      )}
                     </div>
                     <span>
-                      Continue with Google
+                      {isLoading ? "Conectando con Google..." : "Continue with Google"}
                     </span>
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/35 to-white/0"

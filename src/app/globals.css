@@ -34,6 +34,11 @@ input {
   font-family: inherit;
 }
 
+#clerk-captcha,
+#clerk-captcha iframe {
+  pointer-events: auto;
+}
+
 @keyframes gallery-in {
   0% {
     opacity: 0;
